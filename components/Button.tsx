@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -15,6 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   href,
   ...props 
 }) => {
+  const linkOnClick = props.onClick as unknown as React.MouseEventHandler<HTMLAnchorElement> | undefined;
   const baseStyles = "inline-flex items-center justify-center px-6 py-3 text-base font-bold rounded-2xl transition-all duration-100 focus:outline-none focus:ring-4 focus:ring-opacity-50 active:scale-95 active:translate-y-1 text-decoration-none";
   
   const variants = {
@@ -24,11 +26,26 @@ export const Button: React.FC<ButtonProps> = ({
     ghost: "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
   };
 
+  const isInternalHref = Boolean(href && href.startsWith('/'));
+
+  if (href && isInternalHref) {
+    return (
+      <Link
+        href={href}
+        className={`${baseStyles} ${variants[variant]} ${className}`}
+        onClick={linkOnClick}
+      >
+        {children}
+      </Link>
+    );
+  }
+
   if (href) {
     return (
-      <motion.a 
+        <motion.a 
         href={href}
         className={`${baseStyles} ${variants[variant]} ${className}`} 
+        onClick={linkOnClick}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98, translateY: 4, borderBottomWidth: 0 }}
       >

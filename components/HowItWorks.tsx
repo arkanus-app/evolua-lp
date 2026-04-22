@@ -14,9 +14,17 @@ export const HowItWorks: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   
-  // Data Generation
-  const subjects = ["Mathematics 101", "History Final", "Physics I", "Biology Intro", "Chem 202"];
+  // Keep the first render deterministic so SSR and hydration match.
+  const subjects = [
+    t('hiw.subject.math'),
+    t('hiw.subject.history'),
+    t('hiw.subject.physics'),
+    t('hiw.subject.biology'),
+    t('hiw.subject.chem'),
+  ];
   const correctAnswers = [1, 0, 2, 0, 1, 2]; // B, A, C, A, B, C
+  const defaultAnswers = [1, 0, 3, 0, 2, 2];
+  const defaultStudentId = 24018;
 
   const generateRandomAnswers = () => {
     return correctAnswers.map((ans) => {
@@ -31,11 +39,13 @@ export const HowItWorks: React.FC = () => {
   };
 
   const generateStudentId = () => Math.floor(10000 + Math.random() * 90000);
-  const getRandomSubject = () => subjects[Math.floor(Math.random() * subjects.length)];
+  const getRandomSubjectIndex = () => Math.floor(Math.random() * subjects.length);
 
-  const [userAnswers, setUserAnswers] = useState(generateRandomAnswers());
-  const [studentId, setStudentId] = useState(generateStudentId());
-  const [currentSubject, setCurrentSubject] = useState(subjects[0]);
+  const [userAnswers, setUserAnswers] = useState(defaultAnswers);
+  const [studentId, setStudentId] = useState(defaultStudentId);
+  const [currentSubjectIndex, setCurrentSubjectIndex] = useState(0);
+
+  const currentSubject = subjects[currentSubjectIndex] ?? subjects[0];
 
   const currentScore = userAnswers.filter((ans, i) => ans === correctAnswers[i]).length;
 
@@ -68,7 +78,7 @@ export const HowItWorks: React.FC = () => {
       // Reset for next student
       setUserAnswers(generateRandomAnswers());
       setStudentId(generateStudentId());
-      setCurrentSubject(getRandomSubject());
+      setCurrentSubjectIndex(getRandomSubjectIndex());
     }, 4000);
   }, [isUploading, showResults]);
 
@@ -146,7 +156,7 @@ export const HowItWorks: React.FC = () => {
                           <div className="w-full border-b-2 border-slate-100 pb-2 mb-4 flex justify-between items-center">
                               <div className="flex flex-col">
                                 <div className="text-xs font-bold text-slate-800 uppercase tracking-tight">{currentSubject}</div>
-                                <div className="text-[10px] text-slate-400 font-mono">ID: {studentId}</div>
+                                <div className="text-[10px] text-slate-400 font-mono">{t('hiw.studentId')}: {studentId}</div>
                               </div>
                               <div className="h-8 w-8 bg-slate-100 rounded-full" />
                           </div>
@@ -205,7 +215,7 @@ export const HowItWorks: React.FC = () => {
                           className="flex flex-col items-center justify-center text-slate-400"
                         >
                            <CloudUpload className="w-16 h-16 text-brand-yellow mb-2" />
-                           <span className="text-xs font-bold uppercase tracking-widest">Syncing...</span>
+                           <span className="text-xs font-bold uppercase tracking-widest">{t('hiw.syncing')}</span>
                         </motion.div>
                       )}
                     </AnimatePresence>

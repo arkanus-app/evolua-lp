@@ -157,7 +157,7 @@ export const Features: React.FC = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-1000"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 [perspective:1000px]"
         >
           {features.map((feature, index) => (
             <motion.div key={index} variants={item} className="h-full">

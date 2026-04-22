@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -15,7 +17,7 @@ import { CurriculumBreakdown } from './components/CurriculumBreakdown';
 import { Footer } from './components/Footer';
 import { Button } from './components/Button';
 import { motion } from 'framer-motion';
-import { LanguageProvider, useLanguage } from './LanguageContext';
+import { useLanguage } from './LanguageContext';
 
 const MainContent: React.FC = () => {
   const { t } = useLanguage();
@@ -56,7 +58,7 @@ const MainContent: React.FC = () => {
                 {t('cta.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button className="bg-slate-900 text-white border-b-4 border-slate-700 hover:bg-slate-800 hover:border-slate-900 active:bg-slate-900 text-lg px-8">
+                <Button href="/login" className="bg-slate-900 text-white border-b-4 border-slate-700 hover:bg-slate-800 hover:border-slate-900 active:bg-slate-900 text-lg px-8">
                   {t('cta.btn.start')}
                 </Button>
                 <Button className="bg-white text-slate-900 border-b-4 border-slate-300 hover:bg-slate-50 text-lg px-8">
@@ -74,11 +76,7 @@ const MainContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  return (
-    <LanguageProvider>
-      <MainContent />
-    </LanguageProvider>
-  );
+  return <MainContent />;
 };
 
 export default App;

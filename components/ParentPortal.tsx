@@ -5,87 +5,60 @@ import { Button } from './Button';
 import { useLanguage } from '../LanguageContext';
 
 export const ParentPortal: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   // State for the interactive phone demo
   const [notifications, setNotifications] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<number | string | null>(null);
 
-  // Helper to get descriptions based on lang
-  const getDesc = (type: string) => {
-     const descs: Record<string, Record<string, string>> = {
-        EN: {
-           grade: "Great performance! The essay showed strong analytical skills. Keep reviewing the citation format.",
-           event: "Don't forget to sign the permission slip by Friday. We need volunteers for the booth!",
-           message: "Please schedule a time to discuss the upcoming project requirements.",
-           award: "Awarded for consistently helping peers during group study sessions.",
-           attendance: "Marked present on time. Consistent attendance this month."
-        },
-        PT: {
-           grade: "Ótimo desempenho! A redação mostrou fortes habilidades analíticas. Continue revisando o formato de citação.",
-           event: "Não se esqueça de assinar a autorização até sexta-feira. Precisamos de voluntários!",
-           message: "Por favor, agende um horário para discutir os requisitos do próximo projeto.",
-           award: "Premiado por ajudar consistentemente os colegas durante as sessões de estudo em grupo.",
-           attendance: "Marcado presente no horário. Frequência consistente este mês."
-        },
-        ES: {
-           grade: "¡Gran desempeño! El ensayo mostró fuertes habilidades analíticas. Sigue revisando el formato de citas.",
-           event: "No olvides firmar el permiso para el viernes. ¡Necesitamos voluntarios!",
-           message: "Por favor, programe una hora para discutir los requisitos del próximo proyecto.",
-           award: "Premiado por ayudar constantemente a sus compañeros durante las sesiones de estudio.",
-           attendance: "Marcado presente a tiempo. Asistencia constante este mes."
-        }
-     };
-     // @ts-ignore
-     return descs[language][type] || descs['EN'][type];
-  };
+  const getDesc = (type: string) => t(`parent.desc.${type}`);
 
   // Reset notifications when language changes to update text
   useEffect(() => {
     setNotifications([
-      { 
-        id: 1, 
-        type: 'grade', 
-        title: t('parent.notif.grade.title'), 
-        subtitle: t('parent.notif.grade.sub'), 
-        value: '94%', 
-        time: '2m', 
+      {
+        id: 1,
+        type: 'grade',
+        title: t('parent.notif.grade.title'),
+        subtitle: t('parent.notif.grade.sub'),
+        value: '94%',
+        time: '2m',
         color: 'bg-brand-yellow text-slate-900',
         sender: 'Mr. Anderson',
         description: getDesc('grade')
       },
-      { 
-        id: 2, 
-        type: 'event', 
-        title: t('parent.notif.event.title'), 
-        subtitle: t('parent.notif.event.sub'), 
-        value: '1d', 
-        time: '1h', 
+      {
+        id: 2,
+        type: 'event',
+        title: t('parent.notif.event.title'),
+        subtitle: t('parent.notif.event.sub'),
+        value: '1d',
+        time: '1h',
         color: 'bg-blue-100 text-blue-700',
         sender: 'School Admin',
         description: getDesc('event')
       },
     ]);
-    setExpandedId(null); 
-  }, [language, t]);
+    setExpandedId(null);
+  }, [t]);
 
   const triggerNotification = () => {
     const templates = [
-       { type: 'message', title: 'New Message', subtitle: 'Mrs. Robinson', value: '1', color: 'bg-purple-100 text-purple-700' },
-       { type: 'grade', title: t('parent.notif.grade.title'), subtitle: 'History Essay', value: 'A-', color: 'bg-brand-yellow text-slate-900' },
-       { type: 'award', title: 'Achievement', subtitle: 'Homework Hero', value: 'Lvl 5', color: 'bg-green-100 text-green-700' },
-       { type: 'attendance', title: 'Attendance', subtitle: 'Present', value: 'OK', color: 'bg-slate-100 text-slate-700' },
+       { type: 'message', title: t('parent.dynamic.message.title'), subtitle: 'Mrs. Robinson', value: '1', color: 'bg-purple-100 text-purple-700' },
+       { type: 'grade', title: t('parent.notif.grade.title'), subtitle: t('parent.dynamic.grade.subtitle'), value: 'A-', color: 'bg-brand-yellow text-slate-900' },
+       { type: 'award', title: t('parent.dynamic.award.title'), subtitle: t('parent.dynamic.award.subtitle'), value: 'Lvl 5', color: 'bg-green-100 text-green-700' },
+       { type: 'attendance', title: t('parent.dynamic.attendance.title'), subtitle: t('parent.dynamic.attendance.subtitle'), value: 'OK', color: 'bg-slate-100 text-slate-700' },
     ];
-    
+
     const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
     const newNotif = {
       ...randomTemplate,
       id: Date.now(),
       time: '1s',
-      sender: 'System',
+      sender: t('parent.sender.system'),
       description: getDesc(randomTemplate.type)
     };
-    
+
     setNotifications(prev => [newNotif, ...prev.slice(0, 3)]);
     setExpandedId(newNotif.id); // Auto expand new one to show it off
   };
@@ -105,7 +78,7 @@ export const ParentPortal: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
           {/* Subtle Graph Grid */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:30px_30px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
-          
+
           {/* Floating Math Symbols - Reduced count and duration for smoother FPS */}
           {[
               { s: 'π', x: '10%', y: '20%', d: 15, scale: 1 },
@@ -118,15 +91,15 @@ export const ParentPortal: React.FC = () => {
                <motion.div
                   key={i}
                   initial={{ y: 0, opacity: 0 }}
-                  animate={{ 
+                  animate={{
                       y: [0, -30, 0],
                       opacity: [0.05, 0.2, 0.05],
                       rotate: [0, 15, -15, 0]
                   }}
-                  transition={{ 
-                      duration: item.d, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
+                  transition={{
+                      duration: item.d,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
                   }}
                   className="absolute text-slate-600 font-serif font-bold text-4xl md:text-6xl will-change-transform"
                   style={{ left: item.x, top: item.y, scale: item.scale }}
@@ -134,18 +107,18 @@ export const ParentPortal: React.FC = () => {
                   {item.s}
                </motion.div>
           ))}
-          
+
           {/* Rotating Geometric Orbits - Simplified */}
-           <motion.div 
+           <motion.div
                animate={{ rotate: 360 }}
-               transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+               transition={{ duration: 100, repeat: Infinity, ease: 'linear' }}
                className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] border border-slate-800/50 rounded-full border-dashed opacity-30 will-change-transform"
            />
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
+
           {/* Text Content */}
           <div className="order-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/50 text-green-400 border border-green-800 text-xs font-bold uppercase tracking-wide mb-6">
@@ -159,14 +132,14 @@ export const ParentPortal: React.FC = () => {
             <p className="text-lg text-slate-400 mb-8 font-medium leading-relaxed">
                {t('parent.subtitle')}
             </p>
-            
+
             <ul className="space-y-4 mb-10">
                {[
                  t('parent.list.1'),
                  t('parent.list.2'),
                  t('parent.list.3')
                ].map((feat, i) => (
-                 <motion.li 
+                 <motion.li
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -184,7 +157,7 @@ export const ParentPortal: React.FC = () => {
                <Button variant="primary" href="#contact" className="w-full sm:w-auto">
                   {t('parent.btn.enable')}
                </Button>
-               <button 
+               <button
                   onClick={triggerNotification}
                   className="group flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-white border-2 border-slate-700 hover:bg-slate-800 hover:border-slate-600 transition-all active:scale-95 w-full sm:w-auto"
                >
@@ -199,17 +172,17 @@ export const ParentPortal: React.FC = () => {
           </div>
 
           {/* Phone Animation */}
-          <div className="order-2 flex justify-center lg:justify-end perspective-1000 mt-8 lg:mt-0">
-             <motion.div 
+          <div className="order-2 flex justify-center lg:justify-end [perspective:1000px] mt-8 lg:mt-0">
+             <motion.div
                initial={{ rotateY: -5, rotateX: 2, opacity: 0, y: 30 }}
                whileInView={{ rotateY: 0, rotateX: 0, opacity: 1, y: 0 }}
-               transition={{ duration: 0.8, ease: "easeOut" }}
-               viewport={{ once: true, margin: "-50px" }}
+               transition={{ duration: 0.8, ease: 'easeOut' }}
+               viewport={{ once: true, margin: '-50px' }}
                className="w-full max-w-[320px] bg-white rounded-[2.5rem] md:rounded-[3rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden relative h-[600px] mx-auto lg:mx-0 will-change-transform"
              >
                 {/* Notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 md:w-32 h-6 bg-slate-800 rounded-b-xl z-20"></div>
-                
+
                 {/* App Header */}
                 <div className="bg-slate-50 pt-12 pb-4 px-6 border-b border-slate-100 sticky top-0 z-10">
                    <div className="flex justify-between items-center">
@@ -225,12 +198,12 @@ export const ParentPortal: React.FC = () => {
 
                 {/* App Body / Feed */}
                 <div className="p-4 bg-slate-50/50 h-full overflow-hidden flex flex-col relative">
-                   
+
                    {/* Dynamic Notifications Feed */}
                    <div className="flex-1 space-y-3 pb-20 relative overflow-y-auto no-scrollbar">
                       <AnimatePresence initial={false} mode="popLayout">
                         {notifications.map((notif) => (
-                           <motion.div 
+                           <motion.div
                               key={notif.id}
                               layout
                               initial={{ opacity: 0, x: -50, scale: 0.9 }}
@@ -241,13 +214,13 @@ export const ParentPortal: React.FC = () => {
                               className="bg-white rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden cursor-pointer group will-change-transform"
                            >
                               <div className={`absolute top-0 left-0 w-1 h-full ${notif.type === 'grade' ? 'bg-brand-yellow' : 'bg-blue-500'}`}></div>
-                              
+
                               {/* Card Header */}
                               <div className="p-4">
                                 <div className="flex justify-between items-start mb-1">
                                    <div className="flex items-center gap-2">
                                       {/* Interactive Profile Icon */}
-                                      <motion.div 
+                                      <motion.div
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={handleProfileClick}
@@ -277,7 +250,7 @@ export const ParentPortal: React.FC = () => {
                               {/* Expanded Description */}
                               <AnimatePresence>
                                 {expandedId === notif.id && (
-                                  <motion.div 
+                                  <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
@@ -295,10 +268,10 @@ export const ParentPortal: React.FC = () => {
                                         </p>
                                         <div className="mt-3 flex gap-2">
                                            <button className="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded-lg hover:bg-slate-100 transition-colors">
-                                              Reply
+                                              {t('parent.actions.reply')}
                                            </button>
                                            <button className="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded-lg hover:bg-slate-100 transition-colors">
-                                              Details
+                                              {t('parent.actions.details')}
                                            </button>
                                         </div>
                                      </div>
@@ -309,11 +282,11 @@ export const ParentPortal: React.FC = () => {
                            </motion.div>
                         ))}
                       </AnimatePresence>
-                      
+
                       {/* Empty State Spacer if few items */}
                       {notifications.length < 2 && (
-                         <motion.div 
-                           initial={{ opacity: 0 }} 
+                         <motion.div
+                           initial={{ opacity: 0 }}
                            animate={{ opacity: 1 }}
                            className="text-center py-8 opacity-30"
                          >

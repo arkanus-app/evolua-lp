@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, Brain, Target, Lightbulb } from 'lucide-react';
@@ -7,6 +7,11 @@ import { useLanguage } from '../LanguageContext';
 export const ClassAnalytics: React.FC = () => {
   const { t } = useLanguage();
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const data = [
     { subject: t('analytics.topic.grammar'), fullKey: 'grammar', A: 120, B: 110, fullMark: 150 },
@@ -68,34 +73,38 @@ export const ClassAnalytics: React.FC = () => {
               </div>
 
               <div className="flex-1 w-full min-h-0 cursor-crosshair">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart 
-                    cx="50%" 
-                    cy="50%" 
-                    outerRadius="75%" 
-                    data={data}
-                    onMouseMove={(e) => {
-                      if (e.activeLabel) {
-                        setActiveSkill(e.activeLabel);
-                      }
-                    }}
-                    onMouseLeave={() => setActiveSkill(null)}
-                  >
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis 
-                        dataKey="subject" 
-                        tick={<CustomTick />}
-                    />
-                    <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                    <Radar name={t('analytics.chart.student')} dataKey="A" stroke="#a855f7" strokeWidth={3} fill="#a855f7" fillOpacity={0.3} />
-                    <Radar name={t('analytics.chart.class')} dataKey="B" stroke="#fbbf24" strokeWidth={3} fill="#fbbf24" fillOpacity={0.3} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                      itemStyle={{ fontWeight: 'bold' }}
-                      active={false} // Hide default tooltip to use our custom card
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart 
+                      cx="50%" 
+                      cy="50%" 
+                      outerRadius="75%" 
+                      data={data}
+                      onMouseMove={(e) => {
+                        if (e.activeLabel) {
+                          setActiveSkill(String(e.activeLabel));
+                        }
+                      }}
+                      onMouseLeave={() => setActiveSkill(null)}
+                    >
+                      <PolarGrid stroke="#e2e8f0" />
+                      <PolarAngleAxis 
+                          dataKey="subject" 
+                          tick={<CustomTick />}
+                      />
+                      <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                      <Radar name={t('analytics.chart.student')} dataKey="A" stroke="#a855f7" strokeWidth={3} fill="#a855f7" fillOpacity={0.3} />
+                      <Radar name={t('analytics.chart.class')} dataKey="B" stroke="#fbbf24" strokeWidth={3} fill="#fbbf24" fillOpacity={0.3} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                        itemStyle={{ fontWeight: 'bold' }}
+                        active={false} // Hide default tooltip to use our custom card
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full w-full" />
+                )}
               </div>
 
               {/* Dynamic Floating Insight Card */}
@@ -114,15 +123,15 @@ export const ClassAnalytics: React.FC = () => {
                              <Target className="w-4 h-4 text-brand-yellow" />
                              {currentSkill.subject}
                           </div>
-                          <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Breakdown</div>
+                          <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{t('analytics.breakdown')}</div>
                        </div>
                        <div className="flex gap-4 text-xs">
                           <div className="flex-1">
-                             <span className="block text-slate-400 font-bold">Student</span>
+                             <span className="block text-slate-400 font-bold">{t('analytics.student')}</span>
                              <span className="text-lg font-black text-purple-600">{Math.round((currentSkill.A / 150) * 100)}%</span>
                           </div>
                           <div className="flex-1">
-                             <span className="block text-slate-400 font-bold">Class Avg</span>
+                             <span className="block text-slate-400 font-bold">{t('analytics.classAvg')}</span>
                              <span className="text-lg font-black text-brand-yellow">{Math.round((currentSkill.B / 150) * 100)}%</span>
                           </div>
                        </div>

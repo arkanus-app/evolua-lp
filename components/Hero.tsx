@@ -7,12 +7,17 @@ import { useLanguage } from '../LanguageContext';
 
 export const Hero: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'creator' | 'gradebook'>('creator');
+  const [isMounted, setIsMounted] = useState(false);
   const { t } = useLanguage();
   
   // Parallax Background Logic
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Tab cycling animation
   useEffect(() => {
@@ -48,7 +53,7 @@ export const Hero: React.FC = () => {
       <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
       {/* NEW: Floating Particles & Atmosphere Container - Optimized for Performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-15 hidden md:block">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-[15] hidden md:block">
          {/* Reduced count of floating elements for better FPS */}
          
          {/* Floating Math Symbols */}
@@ -150,7 +155,7 @@ export const Hero: React.FC = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button href="#contact" className="text-lg px-8 py-4 shadow-xl shadow-brand-yellow/20">
+                <Button href="/login" className="text-lg px-8 py-4 shadow-xl shadow-brand-yellow/20">
                   {t('hero.startFree')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button variant="outline" href="#how-it-works" className="text-lg px-8 py-4">
@@ -176,7 +181,7 @@ export const Hero: React.FC = () => {
           </div>
 
           {/* Hero Visual Side - Dashboard Browser Simulation */}
-          <div className="flex-1 w-full relative lg:-mr-32 xl:-mr-56 perspective-1000">
+          <div className="flex-1 w-full relative lg:-mr-32 xl:-mr-56 [perspective:1000px]">
              <motion.div 
               initial={{ opacity: 0, rotateY: -10, x: 0, y: 100 }}
               whileInView={{ opacity: 1, rotateY: 0, x: 0, y: 0 }}
@@ -243,7 +248,7 @@ export const Hero: React.FC = () => {
                               {[
                                 { label: t('hero.dash.avgScore'), val: '88.4%', sub: '+2.1%', color: 'text-green-500' },
                                 { label: t('hero.dash.pending'), val: '12', sub: t('hero.dash.requiresReview'), color: 'text-orange-500' },
-                                { label: t('hero.dash.attendance'), val: '95%', sub: 'Stable', color: 'text-slate-400' },
+                                { label: t('hero.dash.attendance'), val: '95%', sub: t('hero.dash.stable'), color: 'text-slate-400' },
                               ].map((stat, idx) => (
                                 <motion.div 
                                   key={idx}
@@ -259,25 +264,33 @@ export const Hero: React.FC = () => {
                               ))}
                            </div>
                            <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm p-4 min-h-[180px] flex flex-col">
-                              <div className="flex-1 w-full min-h-0">
-                                <ResponsiveContainer width="100%" height="100%">
-                                  <AreaChart data={[
-                                    {v: 65}, {v: 70}, {v: 68}, {v: 74}, {v: 78}, {v: 85}, {v: 82}, {v: 90}
-                                  ]}>
-                                    <defs>
-                                      <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
-                                      </linearGradient>
-                                    </defs>
-                                    <Area type="monotone" dataKey="v" stroke="#f59e0b" fill="url(#grad1)" strokeWidth={3} animationDuration={1500} />
-                                  </AreaChart>
-                                </ResponsiveContainer>
-                              </div>
+                               <div className="flex-1 w-full min-h-0">
+                                {isMounted ? (
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={[
+                                        {v: 65}, {v: 70}, {v: 68}, {v: 74}, {v: 78}, {v: 85}, {v: 82}, {v: 90}
+                                     ]}>
+                                      <defs>
+                                        <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
+                                          <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                                        </linearGradient>
+                                      </defs>
+                                      <Area type="monotone" dataKey="v" stroke="#f59e0b" fill="url(#grad1)" strokeWidth={3} animationDuration={1500} />
+                                    </AreaChart>
+                                  </ResponsiveContainer>
+                                ) : (
+                                  <div className="h-full w-full" />
+                                )}
+                               </div>
                               <div className="mt-4 pt-4 border-t border-slate-100">
                                 <div className="text-xs font-bold text-slate-400 uppercase mb-2">{t('hero.dash.subjectMastery')}</div>
                                 <div className="space-y-3">
-                                  {[{s: 'Biology', p: 92}, {s: 'History', p: 78}, {s: 'Math', p: 85}].map((sub, idx) => (
+                                  {[
+                                    { s: t('hero.dash.mastery.biology'), p: 92 },
+                                    { s: t('hero.dash.mastery.history'), p: 78 },
+                                    { s: t('hero.dash.mastery.math'), p: 85 }
+                                  ].map((sub, idx) => (
                                     <div key={idx} className="flex items-center gap-2 text-xs font-bold text-slate-700">
                                       <span className="w-12">{sub.s}</span>
                                       <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -343,7 +356,12 @@ export const Hero: React.FC = () => {
                                           <h4 className="font-bold text-slate-800 text-sm">{t('hero.gen.question')}</h4>
                                         </div>
                                         <div className="space-y-2 pl-9">
-                                          {['Carbon Dioxide', 'Oxygen', 'Nitrogen', 'Helium'].map((opt, idx) => (
+                                          {[
+                                            t('hero.gen.option.co2'),
+                                            t('hero.gen.option.oxygen'),
+                                            t('hero.gen.option.nitrogen'),
+                                            t('hero.gen.option.helium')
+                                          ].map((opt, idx) => (
                                             <motion.div 
                                               key={idx}
                                               initial={{ opacity: 0, x: -10 }}
@@ -393,17 +411,17 @@ export const Hero: React.FC = () => {
                           className="h-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col"
                         >
                            <div className="grid grid-cols-4 p-4 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase shrink-0">
-                              <div className="col-span-2">Student</div>
-                              <div className="text-center">Score</div>
-                              <div className="text-right">Status</div>
+                              <div className="col-span-2">{t('hero.gradebook.student')}</div>
+                              <div className="text-center">{t('hero.gradebook.score')}</div>
+                              <div className="text-right">{t('hero.gradebook.status')}</div>
                            </div>
                            <div className="flex-1 overflow-hidden p-2 overflow-y-auto">
                               {[
-                                { name: "Alice Freeman", score: 92, status: "Graded" },
-                                { name: "Bob Smith", score: 88, status: "Graded" },
-                                { name: "Charlie Davis", score: 74, status: "Review" },
-                                { name: "Diana Prince", score: 98, status: "Graded" },
-                                { name: "Evan Wright", score: -1, status: "Pending" },
+                                { name: 'Alice Freeman', score: 92, status: 'graded' },
+                                { name: 'Bob Smith', score: 88, status: 'graded' },
+                                { name: 'Charlie Davis', score: 74, status: 'review' },
+                                { name: 'Diana Prince', score: 98, status: 'graded' },
+                                { name: 'Evan Wright', score: -1, status: 'pending' },
                               ].map((s, i) => (
                                 <motion.div 
                                   key={i}
@@ -421,11 +439,11 @@ export const Hero: React.FC = () => {
                                    </div>
                                    <div className="text-right">
                                       <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${
-                                        s.status === 'Graded' ? 'bg-green-100 text-green-600' :
-                                        s.status === 'Review' ? 'bg-orange-100 text-orange-600' :
+                                        s.status === 'graded' ? 'bg-green-100 text-green-600' :
+                                        s.status === 'review' ? 'bg-orange-100 text-orange-600' :
                                         'bg-slate-100 text-slate-500'
                                       }`}>
-                                        {s.status}
+                                        {t(`hero.gradebook.status.${s.status}`)}
                                       </span>
                                    </div>
                                 </motion.div>
