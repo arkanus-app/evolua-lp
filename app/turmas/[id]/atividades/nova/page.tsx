@@ -1,4 +1,4 @@
-import { ActivityEditorScreen } from '../../../ActivityEditorScreen';
+import { ActivityEditorScreen } from "../../../ActivityEditorScreen";
 
 type CreateActivityPageProps = {
   params: Promise<{

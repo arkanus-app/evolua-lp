@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Menu, X, Zap } from 'lucide-react';
-import { Button } from './Button';
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-import { useLanguage } from '../LanguageContext';
-import { LanguageSelector } from './LanguageSelector';
+import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import { Menu, X, Zap } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useLanguage } from "../LanguageContext";
+import { Button } from "./Button";
+import { LanguageSelector } from "./LanguageSelector";
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,16 +23,16 @@ export const Navbar: React.FC = () => {
       setIsScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
-    { label: t('nav.features'), href: '#features' },
-    { label: t('nav.howItWorks'), href: '#how-it-works' },
-    { label: t('nav.dashboard'), href: '#dashboard' },
-    { label: t('nav.pricing'), href: '#pricing' },
-    { label: t('nav.enterprise'), href: '#enterprise' },
+    { label: t("nav.features"), href: "#features" },
+    { label: t("nav.howItWorks"), href: "#how-it-works" },
+    { label: t("nav.dashboard"), href: "#dashboard" },
+    { label: t("nav.pricing"), href: "#pricing" },
+    { label: t("nav.enterprise"), href: "#enterprise" },
   ];
 
   return (
@@ -39,17 +40,22 @@ export const Navbar: React.FC = () => {
       <nav
         className={`fixed z-50 w-full border-b transition-all duration-300 ${
           isScrolled || isMobileMenuOpen
-            ? 'border-slate-200/50 bg-white/90 py-3 backdrop-blur-xl'
-            : 'border-transparent bg-transparent py-5'
+            ? "border-slate-200/50 bg-white/90 py-3 backdrop-blur-xl"
+            : "border-transparent bg-transparent py-5"
         }`}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div className="flex flex-shrink-0 cursor-pointer items-center gap-3" onClick={() => window.scrollTo(0, 0)}>
+            <div
+              className="flex flex-shrink-0 cursor-pointer items-center gap-3"
+              onClick={() => window.scrollTo(0, 0)}
+            >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border-b-4 border-brand-yellowDark bg-brand-yellow transition-transform hover:rotate-3">
                 <Zap className="h-6 w-6 text-slate-900" fill="currentColor" />
               </div>
-              <span className="font-sans text-2xl font-extrabold tracking-tight text-slate-900">Evalua AI</span>
+              <span className="font-sans text-2xl font-extrabold tracking-tight text-slate-900">
+                Evalua AI
+              </span>
             </div>
 
             <div className="hidden items-center space-x-6 md:flex lg:space-x-8">
@@ -67,7 +73,7 @@ export const Navbar: React.FC = () => {
               <LanguageSelector />
 
               <Button variant="primary" className="px-5 py-2 text-sm" href="/login">
-                {t('nav.getStarted')}
+                {t("nav.getStarted")}
               </Button>
             </div>
 
@@ -84,13 +90,16 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        <motion.div className="absolute bottom-0 left-0 right-0 h-1 origin-left bg-brand-yellow" style={{ scaleX }} />
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-1 origin-left bg-brand-yellow"
+          style={{ scaleX }}
+        />
 
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="absolute left-0 top-full w-full overflow-hidden border-b-4 border-slate-100 bg-white shadow-xl md:hidden"
             >
@@ -107,13 +116,19 @@ export const Navbar: React.FC = () => {
                 ))}
 
                 <div className="mt-4 border-t border-slate-100 px-2 pt-4">
-                  <div className="mb-3 pl-2 text-xs font-extrabold uppercase tracking-widest text-slate-400">Language</div>
+                  <div className="mb-3 pl-2 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                    Language
+                  </div>
                   <LanguageSelector fullWidth align="left" />
                 </div>
 
                 <div className="px-2 pt-2">
-                  <Button className="w-full justify-center" href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    {t('nav.getStarted')}
+                  <Button
+                    className="w-full justify-center"
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {t("nav.getStarted")}
                   </Button>
                 </div>
               </div>

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import en from './locales/en.json';
-import pt from './locales/pt.json';
-import es from './locales/es.json';
+import React, { createContext, type ReactNode, useContext, useState } from "react";
+import en from "./locales/en.json";
+import es from "./locales/es.json";
+import pt from "./locales/pt.json";
 
-export type Language = 'EN' | 'PT' | 'ES';
+export type Language = "EN" | "PT" | "ES";
 
 type TranslationDictionary = Record<string, string>;
 
@@ -24,7 +24,7 @@ const translations: Record<Language, TranslationDictionary> = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('EN');
+  const [language, setLanguage] = useState<Language>("EN");
 
   const t = (key: string): string => {
     return translations[language][key] ?? translations.EN[key] ?? key;
@@ -40,7 +40,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 };

@@ -1,168 +1,225 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import {
-  ArrowLeft,
-  BookOpen,
-  CalendarDays,
-  MapPin,
-  Plus,
-  Save,
-  Zap,
-} from 'lucide-react';
-import { Button } from '../../components/Button';
-import { LanguageSelector } from '../../components/LanguageSelector';
-import { useLanguage } from '../../LanguageContext';
-import {
-  type ActivityQuestion,
-  type ActivityQuestionType,
-  type ActivityStatus,
-} from './mockData';
-import { buildActivityEditorHref, resolveClassFromRoute, resolveEditableActivity } from './routeHelpers';
+import { ArrowLeft, BookOpen, CalendarDays, MapPin, Plus, Save, Zap } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "../../components/Button";
+import { LanguageSelector } from "../../components/LanguageSelector";
+import { useLanguage } from "../../LanguageContext";
+import { api, getApiErrorMessage } from "../../lib/api/client";
+import type {
+  Activity,
+  ActivityQuestion,
+  ActivityQuestionType,
+  ActivityStatus,
+  Turma,
+} from "../../lib/api/contract";
 
 const activityEditorCopy = {
   EN: {
-    back: 'Back to activities',
-    workspace: 'Class workspace',
-    badge: 'Form builder',
-    createTitle: 'Create class activity',
-    editTitle: 'Edit class activity',
-    subtitle: 'Adjust the form structure, refine each question, and keep the activity ready for the class flow.',
-    draft: 'Draft mode',
-    room: 'Room',
-    schedule: 'Schedule',
-    editor: 'Form editor',
-    createLabel: 'New activity',
-    editLabel: 'Editing activity',
-    editorHint: 'This screen centralizes the activity details and every question block in one focused flow.',
-    formTitle: 'Activity title',
-    formTrack: 'Track',
-    formDue: 'Deadline',
-    formStatus: 'Status',
-    questions: 'Questions',
-    blockCount: 'blocks',
-    addQuestion: 'Add question',
-    questionLabel: 'Question',
-    questionType: 'Field type',
-    questionHelper: 'Support text',
-    save: 'Save draft',
+    back: "Back to activities",
+    workspace: "Class workspace",
+    badge: "Form builder",
+    createTitle: "Create class activity",
+    editTitle: "Edit class activity",
+    subtitle:
+      "Adjust the form structure, refine each question, and keep the activity ready for the class flow.",
+    draft: "Draft mode",
+    room: "Room",
+    schedule: "Schedule",
+    editor: "Form editor",
+    createLabel: "New activity",
+    editLabel: "Editing activity",
+    editorHint:
+      "This screen centralizes the activity details and every question block in one focused flow.",
+    formTitle: "Activity title",
+    formTrack: "Track",
+    formDue: "Deadline",
+    formStatus: "Status",
+    questions: "Questions",
+    blockCount: "blocks",
+    addQuestion: "Add question",
+    questionLabel: "Question",
+    questionType: "Field type",
+    questionHelper: "Support text",
+    save: "Save draft",
     type: {
-      multipleChoice: 'Multiple choice',
-      shortAnswer: 'Short answer',
-      checkbox: 'Checkboxes',
+      multipleChoice: "Multiple choice",
+      shortAnswer: "Short answer",
+      checkbox: "Checkboxes",
     },
     status: {
-      live: 'Live',
-      scheduled: 'Scheduled',
-      review: 'In review',
+      live: "Live",
+      scheduled: "Scheduled",
+      review: "In review",
     },
   },
   PT: {
-    back: 'Voltar para atividades',
-    workspace: 'Class workspace',
-    badge: 'Construtor de formulario',
-    createTitle: 'Criar atividade da turma',
-    editTitle: 'Editar atividade da turma',
-    subtitle: 'Ajuste a estrutura do formulario, refine cada questao e deixe a atividade pronta para o fluxo da turma.',
-    draft: 'Modo rascunho',
-    room: 'Ambiente',
-    schedule: 'Ritmo',
-    editor: 'Editor de formulario',
-    createLabel: 'Nova atividade',
-    editLabel: 'Editando atividade',
-    editorHint: 'Esta tela concentra os dados da atividade e todos os blocos de questao em um fluxo mais focado.',
-    formTitle: 'Titulo da atividade',
-    formTrack: 'Trilha',
-    formDue: 'Prazo',
-    formStatus: 'Status',
-    questions: 'Questoes',
-    blockCount: 'blocos',
-    addQuestion: 'Adicionar questao',
-    questionLabel: 'Questao',
-    questionType: 'Tipo de campo',
-    questionHelper: 'Texto de apoio',
-    save: 'Salvar rascunho',
+    back: "Voltar para atividades",
+    workspace: "Class workspace",
+    badge: "Construtor de formulario",
+    createTitle: "Criar atividade da turma",
+    editTitle: "Editar atividade da turma",
+    subtitle:
+      "Ajuste a estrutura do formulario, refine cada questao e deixe a atividade pronta para o fluxo da turma.",
+    draft: "Modo rascunho",
+    room: "Ambiente",
+    schedule: "Ritmo",
+    editor: "Editor de formulario",
+    createLabel: "Nova atividade",
+    editLabel: "Editando atividade",
+    editorHint:
+      "Esta tela concentra os dados da atividade e todos os blocos de questao em um fluxo mais focado.",
+    formTitle: "Titulo da atividade",
+    formTrack: "Trilha",
+    formDue: "Prazo",
+    formStatus: "Status",
+    questions: "Questoes",
+    blockCount: "blocos",
+    addQuestion: "Adicionar questao",
+    questionLabel: "Questao",
+    questionType: "Tipo de campo",
+    questionHelper: "Texto de apoio",
+    save: "Salvar rascunho",
     type: {
-      multipleChoice: 'Multipla escolha',
-      shortAnswer: 'Resposta curta',
-      checkbox: 'Caixas de selecao',
+      multipleChoice: "Multipla escolha",
+      shortAnswer: "Resposta curta",
+      checkbox: "Caixas de selecao",
     },
     status: {
-      live: 'Em andamento',
-      scheduled: 'Planejada',
-      review: 'Em revisao',
+      live: "Em andamento",
+      scheduled: "Planejada",
+      review: "Em revisao",
     },
   },
   ES: {
-    back: 'Volver a actividades',
-    workspace: 'Class workspace',
-    badge: 'Constructor de formulario',
-    createTitle: 'Crear actividad de la clase',
-    editTitle: 'Editar actividad de la clase',
-    subtitle: 'Ajusta la estructura del formulario, refina cada pregunta y deja la actividad lista para el flujo de la clase.',
-    draft: 'Modo borrador',
-    room: 'Espacio',
-    schedule: 'Ritmo',
-    editor: 'Editor de formulario',
-    createLabel: 'Nueva actividad',
-    editLabel: 'Editando actividad',
-    editorHint: 'Esta pantalla concentra los datos de la actividad y todos los bloques de preguntas en un flujo mas enfocado.',
-    formTitle: 'Titulo de la actividad',
-    formTrack: 'Linea',
-    formDue: 'Plazo',
-    formStatus: 'Estado',
-    questions: 'Preguntas',
-    blockCount: 'bloques',
-    addQuestion: 'Agregar pregunta',
-    questionLabel: 'Pregunta',
-    questionType: 'Tipo de campo',
-    questionHelper: 'Texto de apoyo',
-    save: 'Guardar borrador',
+    back: "Volver a actividades",
+    workspace: "Class workspace",
+    badge: "Constructor de formulario",
+    createTitle: "Crear actividad de la clase",
+    editTitle: "Editar actividad de la clase",
+    subtitle:
+      "Ajusta la estructura del formulario, refina cada pregunta y deja la actividad lista para el flujo de la clase.",
+    draft: "Modo borrador",
+    room: "Espacio",
+    schedule: "Ritmo",
+    editor: "Editor de formulario",
+    createLabel: "Nueva actividad",
+    editLabel: "Editando actividad",
+    editorHint:
+      "Esta pantalla concentra los datos de la actividad y todos los bloques de preguntas en un flujo mas enfocado.",
+    formTitle: "Titulo de la actividad",
+    formTrack: "Linea",
+    formDue: "Plazo",
+    formStatus: "Estado",
+    questions: "Preguntas",
+    blockCount: "bloques",
+    addQuestion: "Agregar pregunta",
+    questionLabel: "Pregunta",
+    questionType: "Tipo de campo",
+    questionHelper: "Texto de apoyo",
+    save: "Guardar borrador",
     type: {
-      multipleChoice: 'Opcion multiple',
-      shortAnswer: 'Respuesta corta',
-      checkbox: 'Casillas',
+      multipleChoice: "Opcion multiple",
+      shortAnswer: "Respuesta corta",
+      checkbox: "Casillas",
     },
     status: {
-      live: 'En curso',
-      scheduled: 'Planificada',
-      review: 'En revision',
+      live: "En curso",
+      scheduled: "Planificada",
+      review: "En revision",
     },
   },
 } as const;
 
 type ActivityEditorScreenProps = {
   classId: string;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   activityId?: string;
 };
+
+function buildDraftActivity(id: string): Activity {
+  return {
+    id,
+    title: "Nova atividade",
+    track: "Formulario rapido",
+    dueDate: "Prazo a definir",
+    submissions: 0,
+    completion: 0,
+    status: "scheduled",
+    questions: [
+      {
+        id: `${id}-question-1`,
+        title: "Nova questao",
+        type: "multipleChoice",
+        helperText: "Adicione orientacoes curtas para o aluno responder.",
+      },
+    ],
+  };
+}
 
 export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEditorScreenProps) {
   const { language } = useLanguage();
   const copy = activityEditorCopy[language];
-  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [currentClass, setCurrentClass] = useState<Turma | null>(null);
+  const [activity, setActivity] = useState<Activity>(() => buildDraftActivity("draft"));
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const backHref = `/turmas/${classId}?tab=activities`;
 
-  const currentClass = useMemo(
-    () => resolveClassFromRoute(classId, searchParams),
-    [classId, searchParams]
-  );
+  useEffect(() => {
+    const loadEditor = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  const initialActivity = useMemo(
-    () => resolveEditableActivity(currentClass, activityId, mode),
-    [activityId, currentClass, mode]
-  );
+      try {
+        const classResponse = await api.getTurma({
+          params: { turmaId: classId },
+        });
 
-  const [activity, setActivity] = useState(initialActivity);
+        if (classResponse.status !== 200) {
+          setError(getApiErrorMessage(classResponse));
+          return;
+        }
 
-  const backHref = useMemo(
-    () =>
-      buildActivityEditorHref(`/turmas/${classId}`, searchParams, {
-        tab: 'activities',
-      }),
-    [classId, searchParams]
-  );
+        setCurrentClass(classResponse.body);
+
+        if (mode === "create") {
+          setActivity(buildDraftActivity(`draft-${classId}`));
+          return;
+        }
+
+        if (!activityId) {
+          setError("Atividade nao informada.");
+          return;
+        }
+
+        const activityResponse = await api.getAtividade({
+          params: { turmaId: classId, atividadeId: activityId },
+        });
+
+        if (activityResponse.status !== 200) {
+          setError(getApiErrorMessage(activityResponse));
+          return;
+        }
+
+        setActivity(activityResponse.body);
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Nao foi possivel carregar o editor.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadEditor();
+  }, [activityId, classId, mode]);
 
   const statusLabelByActivity: Record<ActivityStatus, string> = {
     live: copy.status.live,
@@ -179,12 +236,12 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
   const handleQuestionChange = (
     questionId: string,
     field: keyof ActivityQuestion,
-    value: string | ActivityQuestionType
+    value: string | ActivityQuestionType,
   ) => {
     setActivity((current) => ({
       ...current,
       questions: current.questions.map((question) =>
-        question.id === questionId ? { ...question, [field]: value } : question
+        question.id === questionId ? { ...question, [field]: value } : question,
       ),
     }));
   };
@@ -197,12 +254,88 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
         {
           id: `${current.id}-question-${current.questions.length + 1}`,
           title: `Questao ${current.questions.length + 1}`,
-          type: 'shortAnswer',
-          helperText: 'Novo campo para orientar a resposta.',
+          type: "shortAnswer",
+          helperText: "Novo campo para orientar a resposta.",
         },
       ],
     }));
   };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setError(null);
+
+    const payload = {
+      title: activity.title,
+      track: activity.track,
+      dueDate: activity.dueDate,
+      status: activity.status,
+      questions: activity.questions.map((question) => ({
+        id: question.id.startsWith("draft") ? undefined : question.id,
+        title: question.title,
+        type: question.type,
+        helperText: question.helperText,
+      })),
+    };
+
+    try {
+      if (mode === "create") {
+        const response = await api.createAtividade({
+          params: { turmaId: classId },
+          body: payload,
+        });
+
+        if (response.status !== 201) {
+          setError(getApiErrorMessage(response));
+          return;
+        }
+
+        setActivity(response.body);
+        router.replace(`/turmas/${classId}/atividades/${response.body.id}`);
+        return;
+      }
+
+      const response = await api.updateAtividade({
+        params: { turmaId: classId, atividadeId: activity.id },
+        body: payload,
+      });
+
+      if (response.status !== 200) {
+        setError(getApiErrorMessage(response));
+        return;
+      }
+
+      setActivity(response.body);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Nao foi possivel salvar a atividade.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-white bg-dot-pattern bg-fixed p-6 font-body">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-200 bg-white p-6 text-sm font-bold text-slate-500">
+          Carregando editor...
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !currentClass) {
+    return (
+      <main className="min-h-screen bg-white bg-dot-pattern bg-fixed p-6 font-body">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-red-100 bg-red-50 p-6 text-sm font-bold text-red-700">
+          {error || "Turma nao encontrada."}
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-white bg-dot-pattern bg-fixed font-body">
@@ -220,7 +353,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                   <Zap className="h-6 w-6 text-slate-900" fill="currentColor" />
                 </div>
                 <div>
-                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">Evalua AI</div>
+                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">
+                    Evalua AI
+                  </div>
                   <div className="text-lg font-extrabold text-slate-900">{copy.workspace}</div>
                 </div>
               </Link>
@@ -243,10 +378,14 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                 {copy.badge}
               </div>
               <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                {mode === 'create' ? copy.createTitle : copy.editTitle}
+                {mode === "create" ? copy.createTitle : copy.editTitle}
               </h1>
-              <p className="mt-3 max-w-2xl text-lg font-semibold text-slate-300">{currentClass.name}</p>
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-300">{copy.subtitle}</p>
+              <p className="mt-3 max-w-2xl text-lg font-semibold text-slate-300">
+                {currentClass.name}
+              </p>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-300">
+                {copy.subtitle}
+              </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100">
@@ -268,11 +407,22 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
               {[
                 { label: copy.room, value: currentClass.room },
                 { label: copy.schedule, value: currentClass.schedule },
-                { label: copy.editor, value: mode === 'create' ? copy.createLabel : copy.editLabel },
-                { label: copy.formStatus, value: statusLabelByActivity[activity.status] },
+                {
+                  label: copy.editor,
+                  value: mode === "create" ? copy.createLabel : copy.editLabel,
+                },
+                {
+                  label: copy.formStatus,
+                  value: statusLabelByActivity[activity.status],
+                },
               ].map((metric) => (
-                <div key={metric.label} className="rounded-[1.8rem] border border-white/10 bg-white/5 p-5">
-                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{metric.label}</div>
+                <div
+                  key={metric.label}
+                  className="rounded-[1.8rem] border border-white/10 bg-white/5 p-5"
+                >
+                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">
+                    {metric.label}
+                  </div>
                   <div className="mt-3 text-2xl font-extrabold text-white">{metric.value}</div>
                 </div>
               ))}
@@ -284,25 +434,37 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
           <div className="space-y-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
-                <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{copy.editor}</div>
-                <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">{activity.title}</h2>
-                <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-500">{copy.editorHint}</p>
+                <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">
+                  {copy.editor}
+                </div>
+                <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
+                  {activity.title}
+                </h2>
+                <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-500">
+                  {copy.editorHint}
+                </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
                   {copy.draft}
                 </div>
-                <button className="inline-flex items-center gap-2 rounded-2xl border-b-4 border-brand-yellowDark bg-brand-yellow px-5 py-3 text-sm font-extrabold text-slate-900 transition hover:brightness-105 active:translate-y-1 active:border-b-0">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 rounded-2xl border-b-4 border-brand-yellowDark bg-brand-yellow px-5 py-3 text-sm font-extrabold text-slate-900 transition hover:brightness-105 active:translate-y-1 active:border-b-0"
+                >
                   <Save className="h-4 w-4" />
-                  {copy.save}
+                  {isSaving ? "Salvando..." : copy.save}
                 </button>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-bold text-slate-700">{copy.formTitle}</span>
+                <span className="mb-2 block text-sm font-bold text-slate-700">
+                  {copy.formTitle}
+                </span>
                 <input
                   value={activity.title}
                   onChange={(event) =>
@@ -316,7 +478,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-bold text-slate-700">{copy.formTrack}</span>
+                <span className="mb-2 block text-sm font-bold text-slate-700">
+                  {copy.formTrack}
+                </span>
                 <input
                   value={activity.track}
                   onChange={(event) =>
@@ -344,7 +508,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-bold text-slate-700">{copy.formStatus}</span>
+                <span className="mb-2 block text-sm font-bold text-slate-700">
+                  {copy.formStatus}
+                </span>
                 <select
                   value={activity.status}
                   onChange={(event) =>
@@ -355,7 +521,7 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                   }
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-yellow"
                 >
-                  {(['live', 'scheduled', 'review'] as ActivityStatus[]).map((status) => (
+                  {(["live", "scheduled", "review"] as ActivityStatus[]).map((status) => (
                     <option key={status} value={status}>
                       {statusLabelByActivity[status]}
                     </option>
@@ -367,7 +533,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{copy.questions}</div>
+                  <div className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">
+                    {copy.questions}
+                  </div>
                   <div className="mt-1 text-sm font-semibold text-slate-500">
                     {activity.questions.length} {copy.blockCount}
                   </div>
@@ -384,7 +552,10 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
 
               <div className="space-y-3">
                 {activity.questions.map((question, index) => (
-                  <div key={question.id} className="rounded-[1.4rem] border border-slate-200 bg-white p-4">
+                  <div
+                    key={question.id}
+                    className="rounded-[1.4rem] border border-slate-200 bg-white p-4"
+                  >
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div className="text-sm font-extrabold text-slate-900">
                         {copy.questionLabel} {index + 1}
@@ -401,7 +572,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                         </span>
                         <input
                           value={question.title}
-                          onChange={(event) => handleQuestionChange(question.id, 'title', event.target.value)}
+                          onChange={(event) =>
+                            handleQuestionChange(question.id, "title", event.target.value)
+                          }
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-yellow"
                         />
                       </label>
@@ -413,11 +586,17 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                         <select
                           value={question.type}
                           onChange={(event) =>
-                            handleQuestionChange(question.id, 'type', event.target.value as ActivityQuestionType)
+                            handleQuestionChange(
+                              question.id,
+                              "type",
+                              event.target.value as ActivityQuestionType,
+                            )
                           }
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-yellow"
                         >
-                          {(['multipleChoice', 'shortAnswer', 'checkbox'] as ActivityQuestionType[]).map((type) => (
+                          {(
+                            ["multipleChoice", "shortAnswer", "checkbox"] as ActivityQuestionType[]
+                          ).map((type) => (
                             <option key={type} value={type}>
                               {questionTypeLabel[type]}
                             </option>
@@ -432,7 +611,9 @@ export function ActivityEditorScreen({ classId, mode, activityId }: ActivityEdit
                       </span>
                       <textarea
                         value={question.helperText}
-                        onChange={(event) => handleQuestionChange(question.id, 'helperText', event.target.value)}
+                        onChange={(event) =>
+                          handleQuestionChange(question.id, "helperText", event.target.value)
+                        }
                         rows={2}
                         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-yellow"
                       />
